@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshLambertMaterial({ color: "#70B237" });
+const material = new THREE.MeshLambertMaterial({ color: "#7BEA24" });
 
 export class World extends THREE.Group {
   //   constructor(size = { width: 32, height: 16 }) {
@@ -10,6 +10,8 @@ export class World extends THREE.Group {
     this.size = size;
   }
   generate() {
+    this.clear();
+
     const maxCount = this.size.width * this.size.width * this.size.width;
     const mesh = new THREE.InstancedMesh(geometry, material, maxCount);
     mesh.count = 0;
