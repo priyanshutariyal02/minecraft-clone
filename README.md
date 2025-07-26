@@ -5,7 +5,7 @@ This is the clone of Minecraft game. I build this to learn game development, how
 ## Techstack
 
 - Vite
-- JavaScript Vinalla
+- JavaScript Vanilla
 - Three.js
 
 ## Libraries
