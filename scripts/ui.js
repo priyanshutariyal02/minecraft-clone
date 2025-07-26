@@ -9,4 +9,7 @@ export function createUI(world) {
   gui.onChange(() => {
     world.generate();
   });
+
+  // on click generate button then world generate
+  //   gui.add(world, "generate");
 }
