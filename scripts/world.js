@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise.js";
 import { RNG } from "./rng";
+import { blocks } from "./blocks";
+
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshLambertMaterial({ color: 0x00d000 });
+const material = new THREE.MeshLambertMaterial();
 
 export class World extends THREE.Group {
   /**
@@ -48,7 +50,7 @@ export class World extends THREE.Group {
 
         for (let z = 0; z < this.size.width; z++) {
           row.push({
-            id: 0,
+            id: blocks.empty.id,
             instanceId: null,
           });
         }
@@ -82,8 +84,14 @@ export class World extends THREE.Group {
         );
 
         // fill all blocks at or  below the terrain height
-        for (let y = 0; y <= height; y++) {
-          this.setBlockId(x, y, z, 1);
+        for (let y = 0; y <= this.size.height; y++) {
+          if (y < height) {
+            this.setBlockId(x, y, z, blocks.dirt.id);
+          } else if (y === height) {
+            this.setBlockId(x, y, z, blocks.grass.id);
+          } else {
+            this.setBlockId(x, y, z, blocks.empty.id);
+          }
         }
       }
     }
@@ -102,11 +110,13 @@ export class World extends THREE.Group {
       for (let y = 0; y < this.size.height; y++) {
         for (let z = 0; z < this.size.width; z++) {
           const blockId = this.getBlock(x, y, z).id;
+          const blockType = Object.values(blocks).find((x) => x.id === blockId);
           const instanceId = mesh.count;
 
-          if (blockId !== 0) {
+          if (blockId !== blocks.empty.id && !this.isBlockObscured(x, y, z)) {
             matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
             mesh.setMatrixAt(instanceId, matrix);
+            mesh.setColorAt(instanceId, new THREE.Color(blockType.color));
             this.setBlockInstanceId(z, y, z, instanceId);
             mesh.count++;
           }
@@ -179,6 +189,37 @@ export class World extends THREE.Group {
       return true;
     } else {
       return false;
+    }
+  }
+
+  /**
+   * returns true if this block is completely hidden by other block
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   * @returns {boolean}
+   */
+
+  isBlockObscured(x, y, z) {
+    const up = this.getBlock(x, y + 1, z)?.id ?? blocks.empty.id;
+    const down = this.getBlock(x, y - 1, z)?.id ?? blocks.empty.id;
+    const left = this.getBlock(x + 1, y, z)?.id ?? blocks.empty.id;
+    const right = this.getBlock(x - 1, y, z)?.id ?? blocks.empty.id;
+    const fronward = this.getBlock(x, y, z + 1)?.id ?? blocks.empty.id;
+    const back = this.getBlock(x, y, z - 1)?.id ?? blocks.empty.id;
+
+    // if any of the block's side is exposed, it is not obscured
+    if (
+      up === blocks.empty.id ||
+      down === blocks.empty.id ||
+      left === blocks.empty.id ||
+      right === blocks.empty.id ||
+      fronward === blocks.empty.id ||
+      back === blocks.empty.id
+    ) {
+      return false;
+    } else {
+      return true;
     }
   }
 }
