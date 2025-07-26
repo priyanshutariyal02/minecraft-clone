@@ -12,4 +12,5 @@ This is the clone of Minecraft game. I build this to learn game development, how
 
 - three
 - lil-gui
+- simplexNoice.js
 
