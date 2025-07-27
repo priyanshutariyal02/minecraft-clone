@@ -14,3 +14,6 @@ This is the clone of Minecraft game. I build this to learn game development, how
 - lil-gui
 - simplexNoice.js
 
+## Notes
+
+- for texture i install minecraft resource textures, and use THREE TextureLoader to put texture
