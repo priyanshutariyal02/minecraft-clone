@@ -4,6 +4,7 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./world";
 import { createUI } from "./ui";
 import { Player } from "./player";
+import { Physics } from "./physics";
 
 const stats = new Stats();
 document.body.append(stats.dom);
@@ -38,7 +39,7 @@ world.generate();
 scene.add(world);
 
 const player = new Player(scene);
-
+const physics = new Physics(scene);
 // const geometry = new THREE.BoxGeometry();
 // const material = new THREE.MeshLambertMaterial({ color: "#70B237" });
 // const material = new THREE.MeshBasicMaterial({ color: "0x00d000" });
@@ -89,16 +90,19 @@ let previousTime = performance.now();
 function animate() {
   let currentTime = performance.now();
   let dt = (currentTime - previousTime) / 1000;
-  previousTime = currentTime;
   requestAnimationFrame(animate);
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
-  player.applyInput(dt);
+
+
+  physics.update(dt, player, world);
   renderer.render(
     scene,
     player.controls.isLocked ? player.camera : orbitCamera
   );
   stats.update();
+  
+  previousTime = currentTime;
 }
 
 window.addEventListener("resize", () => {
