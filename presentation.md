@@ -1,9 +1,3 @@
-# Minecraft Clone Project Presentation
-
-## A Journey Through Game Development with Three.js
-
----
-
 ## Project Overview
 
 **Project Name:** Minecraft Clone  
