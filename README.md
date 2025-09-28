@@ -2,6 +2,11 @@
 
 This project is a clone of the popular game Minecraft, built from the ground up to learn about game development, 3D graphics, and game physics.
 
+### Project
+
+- Status: `On Progress` (50% complete)
+- Demo link: https://minecraft-clone-pi-rouge.vercel.app/
+
 ## Features
 
 - Infinite world generation using Simplex noise.
@@ -26,9 +31,11 @@ This project is a clone of the popular game Minecraft, built from the ground up 
 ## Project Notes
 
 ### Texturing
+
 Textures are sourced from a Minecraft resource pack and applied to the world's blocks using `THREE.TextureLoader`.
 
 ### Collision Detection
+
 The collision detection system is implemented in three phases for efficiency:
 
 1.  **Broad Phase:** Filters the potential collidable blocks to a smaller subset of blocks closest to the player. This avoids checking every block in the world.
@@ -50,6 +57,13 @@ The collision detection system is implemented in three phases for efficiency:
     npm run dev
     ```
 
+## Current Game Controls
+
+- `W-A-S-D`: move forward, backward, left, right
+- `space`: jump
+- `esc`: pointer lock and unlock event
+- `R`: reset camera position
+
 ## Project Milestones
 
 This project was built incrementally. Here are the major feature branches:
@@ -58,5 +72,4 @@ This project was built incrementally. Here are the major feature branches:
 2.  `_feat/shadow-texture`: Add shadow and textures to the world
 3.  `_feat/player`: Add player controls (WASD for movement)
 4.  `_feat/physics`: Implement the collision detection system
-5. `_feat/infi-terrain`: Add infinite world generation
-
+5.  `_feat/infi-terrain`: Add infinite world generation
