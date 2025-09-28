@@ -153,9 +153,9 @@ export class World extends THREE.Group {
   generateChunk(x, z) {
     const chunk = new WorldChunk(this.chunkSize, this.params);
     chunk.position.set(
-      x * this.chunkSize.width * 1.01,
+      x * this.chunkSize.width * 1,
       0,
-      z * this.chunkSize.width * 1.01
+      z * this.chunkSize.width * 1
     );
     chunk.userData = { x, z }; // store x & z coordinates
     chunk.generate();
