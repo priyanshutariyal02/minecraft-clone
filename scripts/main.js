@@ -94,14 +94,14 @@ function animate() {
   //   cube.rotation.x += 0.01;
   //   cube.rotation.y += 0.01;
 
-
   physics.update(dt, player, world);
+  world.update(player);
   renderer.render(
     scene,
     player.controls.isLocked ? player.camera : orbitCamera
   );
   stats.update();
-  
+
   previousTime = currentTime;
 }
 
