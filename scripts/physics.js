@@ -110,7 +110,7 @@ export class Physics {
         }
       }
     }
-    console.log("broad phase candidate: ", candidates.length);
+    // console.log("broad phase candidate: ", candidates.length);
     return candidates;
   }
 
@@ -162,7 +162,7 @@ export class Physics {
         this.addContactPointerHelper(closestPoint);
       }
     }
-    console.log(`narrow phase collision: ${collisions.length}`);
+    // console.log(`narrow phase collision: ${collisions.length}`);
     return collisions;
   }
 

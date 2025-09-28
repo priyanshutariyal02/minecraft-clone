@@ -8,10 +8,8 @@ export function createUI(world, player) {
   playerFolder.add(player, "maxSpeed", 1, 20).name("Max Speed");
   playerFolder.add(player.cameraHelper, "visible").name("Camera");
 
-  gui.add(world.size, "width", 8, 128, 1).name("Width");
-  gui.add(world.size, "height", 8, 64, 1).name("Height");
-
   const terrainFolder = gui.addFolder("Terrain");
+  terrainFolder.add(world, "drawDistance", 0, 5, 1).name("Draw Distance");
   terrainFolder.add(world.params, "seed", 0, 1000000).name("Seed");
   terrainFolder.add(world.params.terrain, "scale", 10, 100).name("Scale");
   terrainFolder.add(world.params.terrain, "magnitude", 0, 1).name("Magnitude");
