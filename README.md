@@ -16,8 +16,6 @@ This project is a clone of the popular game Minecraft, built from the ground up 
 - **Visuals & Lighting:** Features Minecraft resource pack textures, dynamic lighting, and shadow mapping for a realistic look and feel.
 - **Performance Optimizations:** Includes efficient collision detection, instanced rendering, frustum culling, and asynchronous chunk loading to maintain a smooth 60 FPS.
 
-## Tech-stack
-
 ## Tech Stack
 
 - **Build Tool:** Vite
