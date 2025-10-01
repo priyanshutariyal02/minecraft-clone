@@ -19,16 +19,24 @@ export class WorldChunk extends THREE.Group {
   // constructor(size = { width: 32, height: 16 }) {
   constructor(size, params) {
     super();
+    this.loaded = false;
     this.size = size;
     this.params = params;
   }
 
   generate() {
+    const start = performance.now();
+
     const rng = new RNG(this.params.seed);
+
     this.initializeTerrain();
     this.generateResources(rng);
     this.generateTerrain(rng);
     this.generateMeshes();
+
+    this.loaded = true;
+
+    console.log(`Load chunnk in ${performance.now() - start} ms`);
   }
 
   // initialize the world terrain data

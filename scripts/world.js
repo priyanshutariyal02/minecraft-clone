@@ -3,6 +3,11 @@ import { WorldChunk } from "./worldChunk";
 
 export class World extends THREE.Group {
   /**
+   * Weather or not we want to load the chunks asyncronusly
+   */
+  asyncLoading = true;
+
+  /**
    * The number of chunks to render around the player.
    * When this set to 0, the chunk the player is on
    * is the only one that is rendered. If it is set of 1,
@@ -10,7 +15,7 @@ export class World extends THREE.Group {
    * chunks adjecet to those are rendered, and so on.
    */
 
-  drawDistance = 2;
+  drawDistance = 3;
 
   chunkSize = {
     width: 32,
@@ -158,7 +163,12 @@ export class World extends THREE.Group {
       z * this.chunkSize.width * 1
     );
     chunk.userData = { x, z }; // store x & z coordinates
-    chunk.generate();
+    if (this.asyncLoading) {
+      // load chunk asynchronosly
+      requestIdleCallback(chunk.generate.bind(chunk), { timeout: 1000 });
+    } else {
+      chunk.generate();
+    }
     this.add(chunk);
     console.log(`Adding chunk at X: ${x}, Z: ${z}`);
   }
@@ -175,7 +185,7 @@ export class World extends THREE.Group {
     const coords = this.worldToChunkCoords(x, y, z);
     const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
 
-    if (chunk) {
+    if (chunk && chunk.loaded ) {
       return chunk.getBlock(coords.block.x, coords.block.y, coords.block.z);
     } else {
       return null;
