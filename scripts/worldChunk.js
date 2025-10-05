@@ -105,7 +105,7 @@ export class WorldChunk extends THREE.Group {
         );
 
         // fill all blocks at or  below the terrain height
-        for (let y = 0; y <= this.size.height; y++) {
+        for (let y = 0; y < this.size.height; y++) {
           if (y < height && this.getBlock(x, y, z).id === blocks.empty.id) {
             this.setBlockId(x, y, z, blocks.dirt.id);
           } else if (y === height) {
@@ -120,47 +120,71 @@ export class WorldChunk extends THREE.Group {
 
   // generate the 3d representation of the world
   generateMeshes() {
+    console.log(
+      `generateMeshes() start — chunk pos=(${this.position.x}, ${this.position.z}), size=${this.size.width}x${this.size.height}`
+    );
+
     this.clear();
 
-    const maxCount = this.size.width * this.size.width * this.size.height;
-
-    // create a lookup table where the key is the block id
+    // create lookup table for meshes
     const meshes = {};
-    Object.values(blocks)
-      .filter((blockType) => blockType.id !== blocks.empty.id)
-      .forEach((blockType) => {
-        const mesh = new THREE.InstancedMesh(
-          geometry,
-          blockType.material,
-          maxCount
-        );
-        mesh.name = blockType.name;
-        mesh.count = 0;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        meshes[blockType.id] = mesh;
-      });
-
     const matrix = new THREE.Matrix4();
+
+    // Track visible block positions by block type
+    const visibleBlocks = {};
+
     for (let x = 0; x < this.size.width; x++) {
       for (let y = 0; y < this.size.height; y++) {
         for (let z = 0; z < this.size.width; z++) {
           const blockId = this.getBlock(x, y, z).id;
           if (blockId === blocks.empty.id) continue;
 
-          const mesh = meshes[blockId];
-          const instanceId = mesh.count;
-
           if (!this.isBlockObscured(x, y, z)) {
-            matrix.setPosition(x, y, z);
-            mesh.setMatrixAt(instanceId, matrix);
-            this.setBlockInstanceId(z, y, z, instanceId);
-            mesh.count++;
+            if (!visibleBlocks[blockId]) visibleBlocks[blockId] = [];
+            visibleBlocks[blockId].push({ x, y, z });
           }
         }
       }
     }
-    this.add(...Object.values(meshes));
+
+    // Log total visible count
+    const totalVisible = Object.values(visibleBlocks).reduce(
+      (sum, arr) => sum + arr.length,
+      0
+    );
+    console.log(`generateMeshes() estimatedVisible instances: ${totalVisible}`);
+
+    // Create instanced meshes only for visible blocks
+    Object.entries(visibleBlocks).forEach(([blockId, blocksList]) => {
+      const blockType = Object.values(blocks).find((b) => b.id == blockId);
+      if (!blockType) return;
+
+      const count = blocksList.length;
+      if (count <= 0) return;
+
+      console.log(
+        `✅ Creating InstancedMesh for block type: ${blockType.name}, count=${count}`
+      );
+
+      const mesh = new THREE.InstancedMesh(geometry, blockType.material, count);
+      mesh.name = blockType.id;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      blocksList.forEach((pos, index) => {
+        matrix.setPosition(pos.x, pos.y, pos.z);
+        mesh.setMatrixAt(index, matrix);
+        this.setBlockInstanceId(pos.x, pos.y, pos.z, index);
+      });
+
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+      this.add(mesh);
+    });
+
+    console.log(
+      `✅ Finished generateMeshes() — chunk (${this.position.x}, ${this.position.z})`
+    );
   }
 
   /**
@@ -177,6 +201,64 @@ export class WorldChunk extends THREE.Group {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Removes the block at (x, y, z)
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   */
+
+  removeBlock(x, y, z) {
+    const block = this.getBlock(x, y, z);
+    if (block && block.id !== blocks.empty.id) {
+      this.deleteBlockInstances(x, y, z);
+      this.setBlockId(x, y, z, blocks.empty.id);
+    }
+  }
+
+  /**
+   * Remove the mesh instance associated with `block` by swapping it
+   * with the last instance and decrementing the instance count
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   */
+  deleteBlockInstances(x, y, z) {
+    const block = this.getBlock(x, y, z);
+
+    if (block.id === null) return;
+
+    // get mesh and instance id of the block
+    const mesh = this.children.find(
+      (instanceMesh) => instanceMesh.name === block.id
+    );
+    const instanceId = block.instanceId;
+
+    // swapping the transformation matrix of the block in the last position with the block that we are going to remove
+    const lastMatrix = new THREE.Matrix4();
+    mesh.getMatrixAt(mesh.count - 1, lastMatrix);
+
+    // update the instance id of the block in the last position of its new instance id
+    const v = new THREE.Vector3();
+    v.applyMatrix4(lastMatrix);
+    this.setBlockInstanceId(v.x, v.y, v.z, instanceId);
+
+    // swaping the tarnsformation matrix
+    mesh.setMatrixAt(instanceId, lastMatrix);
+
+    // efficienty remove the last instance from the scene
+    mesh.count--;
+
+    // notify the instanced mesh with updated the instance matrix
+    // also recompute the bounding sphere so raycasting works
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+
+    // remove the instance associated with the block
+    this.setBlockInstanceId(x, y, z, null);
+    this.setBlockId(x, y, z, blocks.empty.id);
   }
 
   /**
@@ -201,7 +283,7 @@ export class WorldChunk extends THREE.Group {
    */
 
   setBlockInstanceId(x, y, z, instanceId) {
-    if (this.inBounds(x, y, x)) {
+    if (this.inBounds(x, y, z)) {
       this.data[x][y][z].instanceId = instanceId;
     }
   }
@@ -262,8 +344,15 @@ export class WorldChunk extends THREE.Group {
 
   disposeInstances() {
     this.traverse((obj) => {
-      if (obj.dispose) obj.dispose();
+      if (obj.isInstancedMesh) {
+        obj.geometry.dispose();
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach((m) => m.dispose());
+        } else {
+          obj.material.dispose();
+        }
+      }
     });
-    this.clear(); // clear all the childs objects
+    this.clear(); // remove all children
   }
 }
