@@ -96,6 +96,7 @@ function animate() {
   //   cube.rotation.y += 0.01;
 
   if (player.controls.isLocked) {
+    player.update(world);
     physics.update(dt, player, world);
     world.update(player);
 
