@@ -185,7 +185,7 @@ export class World extends THREE.Group {
     const coords = this.worldToChunkCoords(x, y, z);
     const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
 
-    if (chunk && chunk.loaded ) {
+    if (chunk && chunk.loaded) {
       return chunk.getBlock(coords.block.x, coords.block.y, coords.block.z);
     } else {
       return null;
@@ -243,5 +243,21 @@ export class World extends THREE.Group {
       }
     });
     this.clear();
+  }
+
+  /**
+   * Remove the block at (x, y, z) and set it to empty
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   */
+  removeBlock(x, y, z) {
+    const coords = this.worldToChunkCoords(x, y, z);
+    const chunk = this.getChunk(coords.chunk.x, coords.chunk.z);
+
+    if (chunk) {
+      console.log(coords);
+      chunk.removeBlock(coords.block.x, coords.block.y, coords.block.z);
+    }
   }
 }

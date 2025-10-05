@@ -86,6 +86,18 @@ function setupLights() {
 //   }
 // }
 
+function onMouseDown(event) {
+  if (player.controls.isLocked && player.selectedCoords) {
+    console.log(`remove block at ${JSON.stringify(player.selectedCoords)}`);
+    world.removeBlock(
+      player.selectedCoords.x,
+      player.selectedCoords.y,
+      player.selectedCoords.z
+    );
+  }
+}
+document.addEventListener("mousedown", onMouseDown);
+
 // render loop
 let previousTime = performance.now();
 function animate() {
