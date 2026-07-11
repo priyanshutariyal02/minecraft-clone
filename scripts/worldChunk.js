@@ -162,10 +162,6 @@ export class WorldChunk extends THREE.Group {
       const count = blocksList.length;
       if (count <= 0) return;
 
-      console.log(
-        `✅ Creating InstancedMesh for block type: ${blockType.name}, count=${count}`
-      );
-
       const mesh = new THREE.InstancedMesh(geometry, blockType.material, count);
       mesh.name = blockType.id;
       mesh.castShadow = true;
@@ -183,7 +179,7 @@ export class WorldChunk extends THREE.Group {
     });
 
     console.log(
-      `✅ Finished generateMeshes() — chunk (${this.position.x}, ${this.position.z})`
+      `Finished generateMeshes() — chunk (${this.position.x}, ${this.position.z})`
     );
   }
 
